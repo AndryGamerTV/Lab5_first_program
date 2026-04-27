@@ -1,44 +1,35 @@
 #pragma once
-#include "FigureDetails.h"
+#include <SFML/Graphics.hpp>
+#include <string>
+using namespace std;
 
-class Square : public FigureDetails {
-    float size;
+class Figure {
+protected:
+    float x, y;
+    float x0, y0;
+    sf::Color color;
+    sf::Color start_color;
+    bool visible;
+    bool active;
+
 public:
-    Square() : FigureDetails(0, 0, sf::Color::White), size(40.0f) {}
-    Square(float x, float y, float s, sf::Color col);
+    Figure(float start_x, float start_y, sf::Color c);
+    virtual ~Figure();
 
-    void draw(sf::RenderWindow& window) override;
-    FigureDetails* createClone() const override { return new Square(*this); }
-    FigureMemento createMemento() const override;
-    void restoreFromMemento(const FigureMemento& m) override;
+    virtual void draw(sf::RenderWindow* window) = 0;
+    virtual void move(float dx, float dy, float w_width, float w_height) = 0;
+    virtual void restore() = 0;
+    virtual Figure* clone() = 0;
+    virtual string get_type() const = 0;
+    virtual bool hit_figure(float click_x, float click_y) = 0;
 
-    float getSize() const { return size; }
-};
-
-class Circle : public FigureDetails {
-    float radius;
-public:
-    Circle() : FigureDetails(0, 0, sf::Color::White), radius(40.0f) {}
-    Circle(float x, float y, float r, sf::Color col);
-
-    void draw(sf::RenderWindow& window) override;
-    FigureDetails* createClone() const override { return new Circle(*this); }
-    FigureMemento createMemento() const override;
-    void restoreFromMemento(const FigureMemento& m) override;
-
-    float getRadius() const { return radius; }
-};
-
-class Triangle : public FigureDetails {
-    float size;
-public:
-    Triangle() : FigureDetails(0, 0, sf::Color::White), size(40.0f) {}
-    Triangle(float x, float y, float s, sf::Color col);
-
-    void draw(sf::RenderWindow& window) override;
-    FigureDetails* createClone() const override { return new Triangle(*this); }
-    FigureMemento createMemento() const override;
-    void restoreFromMemento(const FigureMemento& m) override;
-
-    float getSize() const { return size; }
+    bool get_active() const;
+    void activate();
+    void deactivate();
+    void set_visible(bool v);
+    bool get_visible() const;
+    void set_position(float new_x, float new_y);
+    float get_x() const { return x; }
+    float get_y() const { return y; }
+    sf::Color get_color() const { return color; }
 };

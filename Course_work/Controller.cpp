@@ -1,174 +1,106 @@
 #include "Controller.h"
-#include "Aggregate.h"
-#include "Memento.h"
-#include "Prototype.h"
-#include "PrototypeProxy.h"
+#include "FigureProxy.h"
 #include <algorithm>
 
-Controller::Controller() : selectedIndex(-1) {}
-
-Controller& Controller::getInstance() 
-{
-    static Controller instance;
-    return instance;
+Controller::Controller() {
+    current_figure = nullptr;
 }
 
-Controller::~Controller() { clear(); }
-
-void Controller::addObject(FigureDetails* obj) 
-{
-    if (!obj) return;
-    objects.push_back(obj);
-    if (selectedIndex == -1) selectedIndex = 0;
+Controller::~Controller() {
+    for (int i = 0; i < scene_figures.size(); i++) {
+        delete scene_figures[i];
+    }
+    scene_figures.clear();
 }
 
-void Controller::removeSelected() 
-{
-    if (selectedIndex < 0 || selectedIndex >= (int)objects.size()) return;
-    delete objects[selectedIndex];
-    objects.erase(objects.begin() + selectedIndex);
-    if (objects.empty()) selectedIndex = -1;
-    else selectedIndex = std::min(selectedIndex, (int)objects.size() - 1);
+void Controller::add_current(Figure* f) {
+    if (f == nullptr) return;
+
+    if (current_figure != nullptr) {
+        current_figure->deactivate();
+    }
+
+    scene_figures.push_back(f);
+    current_figure = f;
+    current_figure->activate();
 }
 
-void Controller::removeObject(FigureDetails* obj) 
-{
-    auto it = std::find(objects.begin(), objects.end(), obj);
-    if (it == objects.end()) return;
-    int idx = (int)std::distance(objects.begin(), it);
-    delete* it;
-    objects.erase(it);
-    if (objects.empty()) selectedIndex = -1;
+Figure* Controller::get_current_figure() {
+    return current_figure;
+}
+
+void Controller::set_current_figure(Figure* f) {
+    if (current_figure != nullptr) {
+        current_figure->deactivate();
+    }
+
+    current_figure = f;
+
+    if (current_figure != nullptr) {
+        current_figure->activate();
+    }
+}
+
+void Controller::move_current(float dx, float dy, float w_width, float w_height) {
+    if (current_figure != nullptr && current_figure->get_active()) {
+        current_figure->move(dx, dy, w_width, w_height);
+    }
+}
+
+void Controller::next_figure() {
+    if (scene_figures.empty()) return;
+
+    auto it = find(scene_figures.begin(), scene_figures.end(), current_figure);
+
+    if (current_figure != nullptr) current_figure->deactivate();
+
+    if (it == scene_figures.end() || it + 1 == scene_figures.end())
+        current_figure = scene_figures[0];
+    else
+        current_figure = *(it + 1);
+
+    current_figure->activate();
+}
+
+void Controller::remove_current() {
+    if (current_figure == nullptr) return;
+
+    auto it = find(scene_figures.begin(), scene_figures.end(), current_figure);
+    if (it == scene_figures.end()) return;
+
+    delete current_figure;
+    scene_figures.erase(it);
+
+    if (scene_figures.empty()) {
+        current_figure = nullptr;
+    }
     else {
-        if (idx <= selectedIndex) --selectedIndex;
-        selectedIndex = std::min(selectedIndex, (int)objects.size() - 1);
+        current_figure = scene_figures[0];
+        current_figure->activate();
     }
 }
 
-void Controller::clear() 
-{
-    for (auto obj : objects) delete obj;
-    objects.clear();
-    selectedIndex = -1;
+void Controller::restore_current() {
+    if (current_figure != nullptr)
+        current_figure->restore();
 }
 
-void Controller::selectNext() 
-{
-    if (objects.empty()) return;
-    selectedIndex = (selectedIndex + 1) % (int)objects.size();
-}
-
-void Controller::selectPrevious() 
-{
-    if (objects.empty()) return;
-    selectedIndex = (selectedIndex - 1 + (int)objects.size()) % (int)objects.size();
-}
-
-FigureDetails* Controller::getSelected() const 
-{
-    if (selectedIndex < 0 || selectedIndex >= (int)objects.size()) return nullptr;
-    return objects[selectedIndex];
-}
-
-void Controller::updateAll(float deltaTime) {
-    for (auto obj : objects) obj->updateAutoMove(deltaTime);
-
-    for (size_t i = 0; i < objects.size(); ++i) 
-    {
-        if (!objects[i]->isVisible()) continue;
-        for (size_t j = i + 1; j < objects.size(); ++j) 
-        {
-            if (!objects[j]->isVisible()) continue;
-            sf::Vector2f diff = objects[i]->getPosition() - objects[j]->getPosition();
-            float distSq = diff.x * diff.x + diff.y * diff.y;
-
-            if (distSq < 60.0f * 60.0f) 
-            {
-                objects[i]->influenceColor(*objects[j]);
-                objects[j]->influenceColor(*objects[i]);
-            }
-        }
+void Controller::toggle_access_current() {
+    if (current_figure == nullptr) return;
+    FigureProxy* proxy = dynamic_cast<FigureProxy*>(current_figure);
+    if (proxy) {
+        bool currently_visible = proxy->get_visible();
+        proxy->allow_access(!currently_visible);
+        proxy->set_visible(!currently_visible);
     }
 }
 
-void Controller::drawAll(sf::RenderWindow& window) 
-{
-    for (size_t i = 0; i < objects.size(); ++i) 
-    {
-        objects[i]->draw(window);
-        if ((int)i == selectedIndex || std::find(multiSelection.begin(), multiSelection.end(), (int)i) != multiSelection.end())
-            drawSelection(window, objects[i]);
-    }
+void Controller::draw_all(sf::RenderWindow* window) {
+    for (auto f : scene_figures)
+        f->draw(window);
 }
 
-bool Controller::saveToFile(const std::string& filename) const 
-{
-    return Memento::saveScene(objects, filename);
-}
-
-bool Controller::loadFromFile(const std::string& filename) 
-{
-    auto loaded = Memento::loadScene(filename);
-    clear();
-    for (auto obj : loaded) addObject(obj);
-    return !loaded.empty();
-}
-
-FigureDetails* Controller::createFromPrototype(const std::string& type,
-    float x, float y, sf::Color color) 
-{
-    static PrototypeProxy proxy;
-    return proxy.createObject(type, x, y, color);
-}
-
-void Controller::extractAndGroupSelected(float x, float y) 
-{
-    if (multiSelection.empty() && selectedIndex == -1) return;
-
-    std::vector<int> toGroup;
-    if (selectedIndex != -1) 
-    {
-        toGroup.push_back(selectedIndex);
-    }
-    for (int idx : multiSelection) 
-    {
-        if (std::find(toGroup.begin(), toGroup.end(), idx) == toGroup.end()) 
-        {
-            toGroup.push_back(idx);
-        }
-    }
-
-    if (toGroup.size() < 2) return;
-
-    Aggregate* agg = new Aggregate(x, y);
-    std::sort(toGroup.rbegin(), toGroup.rend()); 
-
-    for (int idx : toGroup) {
-        if (idx >= 0 && idx < (int)objects.size()) 
-        {
-            agg->addChild(objects[idx]);
-        }
-    }
-
-    for (int idx : toGroup) {
-        if (idx >= 0 && idx < (int)objects.size()) 
-        {
-            objects.erase(objects.begin() + idx);
-        }
-    }
-
-    multiSelection.clear();
-    selectedIndex = -1;
-    addObject(agg);
-}
-
-void Controller::drawSelection(sf::RenderWindow& window, FigureDetails* obj) 
-{
-    sf::CircleShape marker(8.0f);
-    sf::Vector2f pos = obj->getPosition();
-    marker.setPosition(pos.x - 8.0f, pos.y - 8.0f);
-    marker.setFillColor(sf::Color::Transparent);
-    marker.setOutlineThickness(2.0f);
-    marker.setOutlineColor(sf::Color::Yellow);
-    window.draw(marker);
+string Controller::get_current_type() const {
+    if (current_figure == nullptr) return "none";
+    return current_figure->get_type();
 }

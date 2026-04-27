@@ -1,52 +1,26 @@
 #pragma once
-#include "FigureDetails.h"
+#include "Figure.h"
 #include <vector>
-#include <string>
 
 class Controller {
-    std::vector<FigureDetails*> objects;
-    int selectedIndex;
-    Controller();
+private:
+    vector<Figure*> scene_figures;
+    Figure* current_figure;
 
 public:
-    static Controller& getInstance();
-    Controller(const Controller&) = delete;
-    Controller& operator=(const Controller&) = delete;
+    Controller();
     ~Controller();
 
-    void addObject(FigureDetails* obj);
-    void removeSelected();
-    void removeObject(FigureDetails* obj);
-    void clear();
+    void add_current(Figure* f);
+    Figure* get_current_figure();
+    void set_current_figure(Figure* f);
+    void move_current(float dx, float dy, float w_width, float w_height);
+    void next_figure();
+    void remove_current();
+    void restore_current();
+    void toggle_access_current();
 
-    void selectNext();
-    void selectPrevious();
-
-    std::vector<int> multiSelection;
-    void toggleMultiSelection(int index) 
-    {
-        auto it = std::find(multiSelection.begin(), multiSelection.end(), index);
-        if (it != multiSelection.end()) multiSelection.erase(it);
-        else multiSelection.push_back(index);
-    }
-
-    void clearMultiSelection() { multiSelection.clear(); }
-
-    FigureDetails* getSelected() const;
-    int    getSelectedIndex() const { return selectedIndex; }
-    size_t getObjectCount()   const { return objects.size(); }
-    const std::vector<FigureDetails*>& getObjects() const { return objects; }
-
-    void updateAll(float deltaTime);
-    void drawAll(sf::RenderWindow& window);
-
-    bool saveToFile(const std::string& filename) const;
-    bool loadFromFile(const std::string& filename);
-
-    FigureDetails* createFromPrototype(const std::string& type,
-        float x, float y, sf::Color color);
-    
-    void extractAndGroupSelected(float x, float y);
-private:
-    void drawSelection(sf::RenderWindow& window, FigureDetails* obj);
+    void draw_all(sf::RenderWindow* window);
+    int get_count() const { return (int)scene_figures.size(); }
+    string get_current_type() const;
 };

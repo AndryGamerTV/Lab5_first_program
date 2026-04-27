@@ -18,12 +18,30 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Circle.h" />
+    <ClInclude Include="Controller.h" />
+    <ClInclude Include="Figure.h" />
+    <ClInclude Include="FigureProxy.h" />
+    <ClInclude Include="Square.h" />
+    <ClInclude Include="Triangle.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Circle.cpp" />
+    <ClCompile Include="Controller.cpp" />
+    <ClCompile Include="Figure.cpp" />
+    <ClCompile Include="FigureProxy.cpp" />
+    <ClCompile Include="Proxy_main.cpp" />
+    <ClCompile Include="Square.cpp" />
+    <ClCompile Include="Triangle.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{d2e4ab53-1dba-4909-bff9-7dfb840df8d8}</ProjectGuid>
     <RootNamespace>Coursework</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>Lab5_oop</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -128,27 +146,6 @@
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;sfml-network-d.lib;sfml-audio-d.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="Aggregate.cpp" />
-    <ClCompile Include="Controller.cpp" />
-    <ClCompile Include="FigureDetails.cpp" />
-    <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Figure.cpp" />
-    <ClCompile Include="Memento.cpp" />
-    <ClCompile Include="Prototype.cpp" />
-    <ClCompile Include="ui.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Aggregate.h" />
-    <ClInclude Include="config.h" />
-    <ClInclude Include="Controller.h" />
-    <ClInclude Include="Figure.h" />
-    <ClInclude Include="FigureDetails.h" />
-    <ClInclude Include="Memento.h" />
-    <ClInclude Include="Prototype.h" />
-    <ClInclude Include="PrototypeProxy.h" />
-    <ClInclude Include="ui.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
