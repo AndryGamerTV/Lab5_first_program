@@ -3,7 +3,8 @@
 #include <string>
 using namespace std;
 
-class Figure {
+class Figure 
+{
 protected:
     float x, y;
     float x0, y0;
@@ -29,7 +30,16 @@ public:
     void set_visible(bool v);
     bool get_visible() const;
     void set_position(float new_x, float new_y);
-    float get_x() const { return x; }
-    float get_y() const { return y; }
-    sf::Color get_color() const { return color; }
+    float get_x() const 
+    { 
+        return x; 
+    }
+    float get_y() const 
+    { 
+        return y; 
+    }
+    sf::Color get_color() const 
+    { 
+        return color; 
+    }
 };

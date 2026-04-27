@@ -1,7 +1,8 @@
 #pragma once
 #include "Figure.h"
 
-class Circle : public Figure {
+class Circle : public Figure 
+{
 private:
     sf::CircleShape circle;
     float radius;

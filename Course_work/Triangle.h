@@ -1,7 +1,8 @@
 #pragma once
 #include "Figure.h"
 
-class Triangle : public Figure {
+class Triangle : public Figure 
+{
 private:
     sf::ConvexShape triangle;
     float radius;

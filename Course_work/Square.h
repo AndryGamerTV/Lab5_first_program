@@ -1,7 +1,8 @@
 #pragma once
 #include "Figure.h"
 
-class Square : public Figure {
+class Square : public Figure 
+{
 private:
     sf::RectangleShape square;
     float side;

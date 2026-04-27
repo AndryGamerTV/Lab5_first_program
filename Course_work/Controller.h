@@ -2,7 +2,8 @@
 #include "Figure.h"
 #include <vector>
 
-class Controller {
+class Controller 
+{
 private:
     vector<Figure*> scene_figures;
     Figure* current_figure;
@@ -21,6 +22,9 @@ public:
     void toggle_access_current();
 
     void draw_all(sf::RenderWindow* window);
-    int get_count() const { return (int)scene_figures.size(); }
+    int get_count() const 
+    { 
+        return (int)scene_figures.size(); 
+    }
     string get_current_type() const;
 };
